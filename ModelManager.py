@@ -33,18 +33,4 @@ class ModelManager:
         df_input = df_input[['gender_encoded', 'study_hours', 'attendance_rate', 'previous_grade', 'participation_score']]
         prediction = self.model.predict(df_input)[0]
         return self.grade_encoder.inverse_transform([prediction])[0]
-
-df = pd.read_csv("./Data/Student_Performance_Data.csv")
-manager = ModelManager(df)
-manager.train()
-print("✅ Accuracy:", manager.evaluate())
-
-sample = {
-    'gender': 'Male',
-    'study_hours': 1.0,
-    'attendance_rate': 96.00,
-    'previous_grade': 15.0,
-    'participation_score': 6
-}
-print("🎯 Prediction:", manager.predict(sample))
        
