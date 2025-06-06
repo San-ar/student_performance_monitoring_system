@@ -4,39 +4,17 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 
-# df = pd.read_csv("./Data/Student_Performance_Data.csv")
-
-# # Encoding categorical column
-# encoder = LabelEncoder()
-# df['gender_encoded'] = encoder.fit_transform(df['gender'])
-# df['final_grade_encoded'] = encoder.fit_transform(df['final_grade'])
-
-# # Separating data as x and y
-# x = df[['gender_encoded', 'study_hours', 'attendance_rate', 'previous_garde', 'participation_score']]
-# y = df['final_grade_encoded']
-
-# # Splitting the data into training and test sets
-# x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# # Training the model
-# model = DecisionTreeClassifier(random_state=42)
-# model.fit(x_train, y_train)
-
-# # Evaluating the model
-# y_pred = model.predict(x_test)
-# accuracy = accuracy_score(y_test, y_pred)
-# print(f"Model Accuracy: {accuracy}")
-
 class ModelManager:
     def __init__(self, df):
         self.df = df.copy()
-        self.model = DecisionTreeClassifier()
-        self.encoder = LabelEncoder()
+        self.model = DecisionTreeClassifier(random_state=42)
+        self.gender_encoder = LabelEncoder()
+        self.grade_encoder = LabelEncoder()
 
     def prepare_data(self):
+        self.df['gender_encoded'] = self.gender_encoder.fit_transform(self.df['gender'])
         x = self.df[['gender_encoded', 'study_hours', 'attendance_rate', 'previous_grade', 'participation_score']]
-        x['gender'] = self.encoder.fit_transform(x['gender'])
-        y = self.encoder.fit_transform(self.df['final_grade'])
+        y = self.grade_encoder.fit_transform(self.df['final_grade'])
         return train_test_split(x, y, test_size=0.2, random_state=42)
     
     def train(self):
@@ -51,21 +29,22 @@ class ModelManager:
 
     def predict(self, student_dict):
         df_input = pd.DataFrame([student_dict])
-        df_input['gender'] = self.encoder.transform(df_input['gender'])
+        df_input['gender_encoded'] = self.gender_encoder.transform(df_input['gender'])
+        df_input = df_input[['gender_encoded', 'study_hours', 'attendance_rate', 'previous_grade', 'participation_score']]
         prediction = self.model.predict(df_input)[0]
-        return self.encoder.inverse_transform([prediction])[0]
+        return self.grade_encoder.inverse_transform([prediction])[0]
 
-df = pd.read_csv("./Data/Student_performance_cleaned.csv")
+df = pd.read_csv("./Data/Student_Performance_Data.csv")
 manager = ModelManager(df)
 manager.train()
 print("✅ Accuracy:", manager.evaluate())
 
 sample = {
-    'gender': ['Female'],
-    'study_hours': 6.5,
-    'attendance_rate': 92.0,
-    'previous_grade': 13.0,
-    'participation_score': 7
+    'gender': 'Male',
+    'study_hours': 1.0,
+    'attendance_rate': 96.00,
+    'previous_grade': 15.0,
+    'participation_score': 6
 }
 print("🎯 Prediction:", manager.predict(sample))
        
